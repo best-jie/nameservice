@@ -2,7 +2,6 @@ package nameservice
 
 import (
 	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -14,6 +13,12 @@ func NewHandler(keeper Keeper) sdk.Handler {
 			return handleMsgSetName(ctx, keeper, msg)
 		case MsgBuyName:
 			return handleMsgBuyName(ctx, keeper, msg)
+		case MsgAddNewCoin:
+			return handleMsgAddNewCoin(ctx, keeper, msg)
+		case MsgAddCoin:
+			return handleMsgAddCoin(ctx, keeper, msg)
+		case MsgBurnCoin:
+			return handleMsgBurnCoin(ctx, keeper, msg)
 		default:
 			errMsg := fmt.Sprintf("Unrecognized nameservice Msg type: %v", msg.Type())
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -50,6 +55,109 @@ func handleMsgBuyName(ctx sdk.Context, keeper Keeper, msg MsgBuyName) sdk.Result
 	keeper.SetPrice(ctx, msg.Name, msg.Bid)
 	return sdk.Result{}
 }
+
+
+// ---------------------------------------------
+// Add new token to account
+func handleMsgAddNewCoin(ctx sdk.Context, keeper Keeper, msg MsgAddNewCoin) sdk.Result {
+	// 限定一次只发行一个，不能和之前的重复
+	oldCoins := keeper.coinKeeper.GetCoins(ctx, msg.Owner)
+	newCoins := msg.Amt
+	var addCoins sdk.Coins
+
+	addCoin := newCoins[0]
+	addCoins = append(addCoins, addCoin)
+
+	// 判断重复, 如果要新发行的coin和原来的重复，该怎么输出错误信息？
+	in := contain(addCoin, oldCoins)
+	if !in {
+		_, err := keeper.AddNewCoins(ctx, msg.Owner, addCoins)
+		if err != nil {
+			return sdk.ErrUnknownRequest("Owner address invalid or coins invalid").Result()
+		}
+	}
+
+	return sdk.Result{}
+}
+
+// 增发
+func handleMsgAddCoin(ctx sdk.Context, keeper Keeper, msg MsgAddCoin) sdk.Result {
+	//oldCoins := keeper.coinKeeper.GetCoins(ctx, msg.Owner)
+	newCoins := msg.Amt
+	var addCoins sdk.Coins
+
+	addCoin := newCoins[0]
+	addCoins = append(addCoins, addCoin)
+
+	// 增发，不用判断重复
+	_, err := keeper.AddCoin(ctx, msg.Owner, addCoins)
+	if err != nil {
+		return sdk.ErrUnknownRequest("Owner address invalid or coins invalid").Result()
+	}
+
+	return sdk.Result{}
+}
+
+// 销毁token,
+
+// Burn a token from account
+func handleMsgBurnCoin(ctx sdk.Context, keeper Keeper, msg MsgBurnCoin) sdk.Result {
+	oldCoins := keeper.coinKeeper.GetCoins(ctx, msg.Owner)
+	amount := msg.Amt
+	burnCoin := amount[0]
+	var burnCoins sdk.Coins
+	burnCoins = append(burnCoins, burnCoin)
+
+	//一次销毁一个币,从切片中删除某个Coin,销毁之前要先判断该账户下有没有这个币,还要判断要销毁的币的数量是否超出原来账户下该币的数量
+	// 如果要销毁的币的数量 > 原来账户下该币的数量，该怎么输出错误信息？
+	// ok1,********
+	//ok is:false
+
+	ok := safeBurn(burnCoin, oldCoins)
+	fmt.Println("ok1,********")
+	fmt.Printf("ok is:%v \n", ok)
+	if ok {
+		fmt.Println("ok2,********")
+		_, err := keeper.BurnCoins(ctx, msg.Owner, burnCoins)
+		if err != nil {
+			return sdk.ErrUnknownRequest("Owner address invalid or coins invalid").Result()
+		}
+	}
+
+	return sdk.Result{}
+}
+
+func contain(Coin sdk.Coin, Coins sdk.Coins) bool {
+	for i := 0; i < Coins.Len(); i++ {
+		if Coins[i].Denom == Coin.Denom {
+			return true
+		}
+	}
+	return false
+}
+
+//func safeBurn(Coin sdk.Coin, Coins sdk.Coins) bool {
+//	for i := 0; i < Coins.Len(); i++ {
+//		if Coins[i].Denom == Coin.Denom && Coins[i].Amount == Coin.Amount {
+//			return true
+//		}
+//	}
+//	return false
+//}
+
+func safeBurn(Coin sdk.Coin, Coins sdk.Coins) bool {
+	for i := 0; i < Coins.Len(); i++ {
+		if Coins[i].Denom == Coin.Denom {
+			return true
+		}
+	}
+	return false
+}
+
+
+
+
+
 
 
 

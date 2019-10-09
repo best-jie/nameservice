@@ -95,3 +95,140 @@ func (msg MsgBuyName) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Buyer}
 }
 
+// --------------------------------------------------
+
+// MsgAddCoin defines the AddNewCoin message
+type MsgAddNewCoin struct {
+	Owner sdk.AccAddress `json:"addr"`
+	Amt  sdk.Coins       `json:"amt"`
+}
+
+// MsgAddCoin is a constructor function for MsgAddCoin
+func NewMsgAddNewCoin(owner sdk.AccAddress, amount sdk.Coins) MsgAddNewCoin {
+	return MsgAddNewCoin{
+		Owner: owner,
+		Amt:   amount,
+	}
+}
+
+// Route should return the name of the module
+func (msg MsgAddNewCoin) Route() string { return RouterKey }
+
+// Type should return the action
+func (msg MsgAddNewCoin) Type() string { return "add_new_coin" }
+
+// ValidateBasic runs stateless checks on the message
+func (msg MsgAddNewCoin) ValidateBasic() sdk.Error {
+	if msg.Owner.Empty() {
+		return sdk.ErrInvalidAddress(msg.Owner.String())
+	}
+
+	if !msg.Amt.IsAllPositive() {
+		return sdk.ErrInsufficientCoins("Amt must be positive")
+	}
+	return nil
+}
+
+// GetSignBytes encodes the message for signing
+func (msg MsgAddNewCoin) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
+}
+
+// GetSigners defines whose signature is required
+func (msg MsgAddNewCoin) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.Owner}
+}
+
+// 增发-------------------------------------------------------
+// MsgAddCoin defines the AddCoin message
+type MsgAddCoin struct {
+	Owner sdk.AccAddress `json:"addr"`
+	Amt  sdk.Coins       `json:"amt"`
+}
+
+// MsgAddCoin is a constructor function for MsgAddCoin
+func NewMsgAddCoin(owner sdk.AccAddress, amount sdk.Coins) MsgAddCoin {
+	return MsgAddCoin{
+		Owner: owner,
+		Amt:   amount,
+	}
+}
+
+// Route should return the name of the module
+func (msg MsgAddCoin) Route() string { return RouterKey }
+
+// Type should return the action
+func (msg MsgAddCoin) Type() string { return "add_coin" }
+
+// ValidateBasic runs stateless checks on the message
+func (msg MsgAddCoin) ValidateBasic() sdk.Error {
+	if msg.Owner.Empty() {
+		return sdk.ErrInvalidAddress(msg.Owner.String())
+	}
+
+	if !msg.Amt.IsAllPositive() {
+		return sdk.ErrInsufficientCoins("Amt must be positive")
+	}
+	return nil
+}
+
+// GetSignBytes encodes the message for signing
+func (msg MsgAddCoin) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
+}
+
+// GetSigners defines whose signature is required
+func (msg MsgAddCoin) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.Owner}
+}
+
+//-----------------------------------------------
+
+// MsgBurnCoin
+// MsgBurnCoin defines the BurnCoin message
+type MsgBurnCoin struct {
+	Owner sdk.AccAddress `json:"addr"`
+	Amt   sdk.Coins      `json:"amt"`
+}
+
+// MsgBurnCoin is a constructor function for MsgBurnCoin
+func NewMsgBurnCoin(owner sdk.AccAddress, amount sdk.Coins) MsgBurnCoin {
+	return MsgBurnCoin{
+		Owner: owner,
+		Amt:   amount,
+	}
+}
+
+// Route should return the name of the module
+func (msg MsgBurnCoin) Route() string { return RouterKey }
+
+// Type should return the action
+func (msg MsgBurnCoin) Type() string { return "burn_coin" }
+
+// ValidateBasic runs stateless checks on the message
+func (msg MsgBurnCoin) ValidateBasic() sdk.Error {
+	if msg.Owner.Empty() {
+		return sdk.ErrInvalidAddress(msg.Owner.String())
+	}
+
+	if !msg.Amt.IsAllPositive() {
+		return sdk.ErrInsufficientCoins("Amt must be positive")
+	}
+	return nil
+}
+
+// GetSignBytes encodes the message for signing
+func (msg MsgBurnCoin) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
+}
+
+// GetSigners defines whose signature is required
+func (msg MsgBurnCoin) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.Owner}
+}
+
+
+
+
+
+

@@ -9,11 +9,15 @@ const (
 )
 
 var (
-	NewMsgBuyName = types.NewMsgBuyName
-	NewMsgSetName = types.NewMsgSetName
-	NewWhois      = types.NewWhois
-	ModuleCdc     = types.ModuleCdc
-	RegisterCodec = types.RegisterCodec
+	NewMsgBuyName      = types.NewMsgBuyName
+	NewMsgSetName      = types.NewMsgSetName
+	NewWhois           = types.NewWhois
+	ModuleCdc          = types.ModuleCdc
+	RegisterCodec      = types.RegisterCodec
+	NewMsgAddNewCoin   = types.NewMsgAddNewCoin
+	NewMsgAddCoin      = types.NewMsgAddCoin
+	NewMsgBurnCoin     = types.NewMsgBurnCoin
+
 )
 
 type (
@@ -22,5 +26,8 @@ type (
 	QueryResResolve = types.QueryResResolve
 	QueryResNames   = types.QueryResNames
 	Whois           = types.Whois
+	MsgAddNewCoin   = types.MsgAddNewCoin
+	MsgAddCoin      = types.MsgAddCoin
+	MsgBurnCoin     = types.MsgBurnCoin
 )
 

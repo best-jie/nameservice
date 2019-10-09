@@ -23,6 +23,9 @@ func GetTxCmd(storeKey string, cdc *codec.Codec) *cobra.Command {
 	nameserviceTxCmd.AddCommand(client.PostCommands(
 		GetCmdBuyName(cdc),
 		GetCmdSetName(cdc),
+		GetCmdAddNewCoin(cdc),
+		GetCmdAddCoin(cdc),
+		GetCmdBurnCoin(cdc),
 	)...)
 
 	return nameserviceTxCmd
@@ -89,3 +92,130 @@ func GetCmdSetName(cdc *codec.Codec) *cobra.Command {
 		},
 	}
 }
+
+// nscli tx nameservice add-newcoin address 100atoken --from jack
+
+// GetCmdAddCoin is the CLI command for sending a AddCoin transaction
+func GetCmdAddNewCoin(cdc *codec.Codec) *cobra.Command {
+	return &cobra.Command{
+		Use:     "add-newcoin [address] [amount]",
+		Short:   "add a new coin to account that you own",
+		Args: cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+
+			coins, err := sdk.ParseCoins(args[1])
+			if err != nil {
+				return err
+			}
+
+			key, err := sdk.AccAddressFromBech32(args[0])
+			if err != nil {
+				return err
+			}
+
+			if err = cliCtx.EnsureAccountExistsFromAddr(key); err != nil {
+				return err
+			}
+
+			//
+			msg := types.NewMsgAddNewCoin(key, coins)
+
+			err = msg.ValidateBasic()
+			if err != nil {
+				return err
+			}
+
+			cliCtx.PrintResponse = true
+
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+		},
+	}
+}
+
+// -----------------------------------------------------------
+// nscli tx nameservice add-coin address 100atoken --from jack
+func GetCmdAddCoin(cdc *codec.Codec) *cobra.Command {
+	return &cobra.Command{
+		Use:     "add-coin [address] [amount]",
+		Short:   "add a coin to account that you own",
+		Args: cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+
+			coins, err := sdk.ParseCoins(args[1])
+			if err != nil {
+				return err
+			}
+
+			key, err := sdk.AccAddressFromBech32(args[0])
+			if err != nil {
+				return err
+			}
+
+			if err = cliCtx.EnsureAccountExistsFromAddr(key); err != nil {
+				return err
+			}
+
+			//
+			msg := types.NewMsgAddCoin(key, coins)
+
+			err = msg.ValidateBasic()
+			if err != nil {
+				return err
+			}
+
+			cliCtx.PrintResponse = true
+
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+		},
+	}
+
+}
+
+
+// nscli tx nameservice burn-coin address 100atoken --from jack
+
+// GetCmdBurnCoin is the CLI command for sending a BurnCoin transaction
+func GetCmdBurnCoin(cdc *codec.Codec) *cobra.Command {
+	return &cobra.Command{
+		Use:    "burn-coin [address] [amount]",
+		Short:  "burn a coin from account that you own",
+		Args: cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+
+			coins, err := sdk.ParseCoins(args[1])
+			if err != nil {
+				return err
+			}
+
+			key, err := sdk.AccAddressFromBech32(args[0])
+			if err != nil {
+				return err
+			}
+
+			if err = cliCtx.EnsureAccountExistsFromAddr(key); err != nil {
+				return err
+			}
+
+			msg := types.NewMsgBurnCoin(key, coins)
+
+			err = msg.ValidateBasic()
+			if err != nil {
+				return err
+			}
+
+			cliCtx.PrintResponse = true
+
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+		},
+	}
+}
+

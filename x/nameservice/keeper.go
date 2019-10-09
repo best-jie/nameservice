@@ -2,9 +2,8 @@ package nameservice
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/x/bank"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/bank"
 )
 
 // Keeper maintains the link to data storage and exposes getter/setter methods for the various parts of the state machine
@@ -14,6 +13,7 @@ type Keeper struct {
 	storeKey  sdk.StoreKey // Unexposed key to access store from sdk.Context
 
 	cdc *codec.Codec // The wire codec for binary encoding/decoding.
+
 }
 
 // NewKeeper creates new instances of the nameservice Keeper
@@ -91,6 +91,44 @@ func (k Keeper) SetPrice(ctx sdk.Context, name string, price sdk.Coins) {
 func (k Keeper) GetNamesIterator(ctx sdk.Context) sdk.Iterator {
 	store := ctx.KVStore(k.storeKey)
 	return sdk.KVStorePrefixIterator(store, []byte{})
+}
+
+// ------------------------------------------------------------------
+
+// Add a new coin to accAddress
+func (k Keeper) AddNewCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) (sdk.Coins, sdk.Error) {
+	// 这个map能不能作成全局的，凡是涉及add和burn的地方都可以直接使用
+	allCoins := make(map[string] sdk.Coins)
+
+	newCoins, err := k.coinKeeper.AddCoins(ctx, addr, amt)
+	if err != nil {
+		panic(err)
+	}
+
+	allCoins[addr.String()] = newCoins
+
+	return newCoins, err
+}
+
+// 增发,
+func (k Keeper) AddCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) (sdk.Coins, sdk.Error) {
+	coins, err := k.coinKeeper.AddCoins(ctx, addr, amt)
+	if err != nil {
+		panic(err)
+	}
+	return coins, err
+}
+
+// Burn a token from accAddress
+func (k Keeper) BurnCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) (sdk.Coins, sdk.Error) {
+
+	otherCoins, err := k.coinKeeper.SubtractCoins(ctx, addr, amt)
+	if err != nil {
+		panic(err)
+	}
+
+
+	return otherCoins, err
 }
 
 
